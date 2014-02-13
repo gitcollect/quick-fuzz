@@ -1,0 +1,2 @@
+[quick.io-apps]
+fuzzer = {HERE}/fuzzer.so
