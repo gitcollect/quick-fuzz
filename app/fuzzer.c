@@ -95,6 +95,7 @@ static void* _run(void *nothing G_GNUC_UNUSED)
 static gboolean _app_init()
 {
 	evs_add_handler(PREFIX, "/delayed", NULL, _delayed_on, NULL, TRUE);
+	evs_add_handler(PREFIX, "/reject", NULL, evs_no_on, NULL, FALSE);
 
 	_delayed = g_sequence_new(NULL);
 	_th = g_thread_new("fuzzer_main", _run, NULL);
