@@ -18,34 +18,42 @@ func createClient() *quickigo.QuickIGo {
 }
 
 func createRawClient() net.Conn {
-	c := createSock()
+	for {
+		c := createSock()
 
-	_, err := c.Write([]byte(quickigo.HANDSHAKE))
-	if err != nil {
-		log.Fatal("createRawClient().Handshake_Write():", err)
+		_, err := c.Write([]byte(quickigo.HANDSHAKE))
+		if err != nil {
+			log.Println("createRawClient().Handshake_Write():", err)
+			continue
+		}
+
+		res := make([]byte, len(quickigo.HANDSHAKE))
+		_, err = c.Read(res)
+		if err != nil {
+			log.Println("createRawClient().Handshake_Recv():", err)
+			continue
+		}
+
+		return c
 	}
-
-	res := make([]byte, len(quickigo.HANDSHAKE))
-	_, err = c.Read(res)
-	if err != nil {
-		log.Fatal("createRawClient().Handshake_Recv():", err)
-	}
-
-	return c
 }
 
 func createSock() net.Conn {
-	url, err := url.Parse(ADDR)
-	if err != nil {
-		log.Fatal("createSock():", err)
-	}
+	for i := 0; ; i++ {
+		url, err := url.Parse(ADDR)
+		if err != nil {
+			log.Fatal("createSock():", err)
+			continue
+		}
 
-	c, err := net.Dial("unix", url.Path)
-	if err != nil {
-		log.Fatal("createSock().Dial():", err)
-	}
+		c, err := net.Dial("unix", url.Path)
+		if err != nil && i > 10 {
+			log.Println("createSock().Dial():", err)
+			continue
+		}
 
-	return c
+		return c
+	}
 }
 
 func main() {
