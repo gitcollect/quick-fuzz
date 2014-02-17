@@ -13,14 +13,14 @@ func subscribers(spawn int) {
 	}
 }
 
-func subscribers_fuzz(spawn int) {
+func subscribersFuzz(spawn int) {
 	for i := 0; i < spawn; i++ {
-		go subscriber_fuzz(spawn)
+		go subscriberFuzz(spawn)
 	}
 }
 
 func subscriber(spawned int) {
-	qio := createClient()
+	qio := utilCreateClient()
 	qio.Open()
 
 	var fn quickigo.SubCb = func(data interface{}) {}
@@ -28,25 +28,25 @@ func subscriber(spawned int) {
 	for {
 		path := fmt.Sprintf("/fuzzer/delayed/%d", rand.Intn(spawned))
 
-		util_pause()
+		utilPause()
 		qio.On(path, &fn)
 
-		util_pause()
+		utilPause()
 		qio.Off(path, nil)
 	}
 }
 
-func subscriber_fuzz(spawned int) {
-	qio := createClient()
+func subscriberFuzz(spawned int) {
+	qio := utilCreateClient()
 	qio.Open()
 
 	chCb := make(chan bool)
 	for {
-		util_pause()
+		utilPause()
 
 		switch rand.Intn(4) {
 		case 0:
-			path := util_path_rand()
+			path := utilPathRand()
 			qio.Send("/qio/ron", path,
 				func(_ interface{}, _ quickigo.ServerCbFn, code int, _ string) {
 					if code == quickigo.CODE_OK {
@@ -58,7 +58,7 @@ func subscriber_fuzz(spawned int) {
 				})
 
 		case 1:
-			path := util_path_valid_with_rand()
+			path := utilPathValidWithRand()
 			qio.Send("/qio/on", path,
 				func(_ interface{}, _ quickigo.ServerCbFn, code int, _ string) {
 					if code == quickigo.CODE_OK {
@@ -70,7 +70,7 @@ func subscriber_fuzz(spawned int) {
 				})
 
 		case 2:
-			path := util_path_rand()
+			path := utilPathRand()
 			qio.Send("/qio/off", path,
 				func(_ interface{}, _ quickigo.ServerCbFn, code int, _ string) {
 					if code != quickigo.CODE_NOT_FOUND {
@@ -82,7 +82,7 @@ func subscriber_fuzz(spawned int) {
 				})
 
 		case 3:
-			path := util_path_valid()
+			path := utilPathValid()
 			qio.Send("/qio/off", path,
 				func(_ interface{}, _ quickigo.ServerCbFn, code int, _ string) {
 					if code != quickigo.CODE_OK {

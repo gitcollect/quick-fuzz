@@ -7,7 +7,7 @@ func heartbeaters(spawn int) {
 }
 
 func heartbeater() {
-	qio := createClient()
+	qio := utilCreateClient()
 	qio.Open()
 	select {}
 }

@@ -8,9 +8,9 @@ func reconnectors(spawn int) {
 
 func reconnector() {
 	for {
-		qio := createClient()
+		qio := utilCreateClient()
 		qio.Open()
-		util_pause()
+		utilPause()
 		qio.Close()
 	}
 }

@@ -1,7 +1,11 @@
 package main
 
 import (
+	"github.ihrint.com/quickio/quickigo"
+	"log"
 	"math/rand"
+	"net"
+	"net/url"
 	"time"
 )
 
@@ -19,22 +23,73 @@ var (
 	}
 )
 
-func util_pause() {
-	<-time.After(time.Second * time.Duration(rand.Intn(SLEEP_MAX)))
+const (
+	ADDR = "unix:///tmp/quickio.sock"
+)
+
+func utilCreateClient() *quickigo.QuickIGo {
+	return quickigo.New([]string{ADDR})
 }
 
-func util_path() string {
-	switch rand.Intn(3) {
-	case 0:
-		return util_path_rand()
-	case 1:
-		return util_path_valid()
-	default:
-		return util_path_valid_with_rand()
+func utilCreateRawClient() net.Conn {
+	for {
+		c := utilCreateSock()
+
+		_, err := c.Write([]byte(quickigo.HANDSHAKE))
+		if err != nil {
+			log.Println("createRawClient().Handshake_Write():", err)
+			continue
+		}
+
+		res := make([]byte, len(quickigo.HANDSHAKE))
+		_, err = c.Read(res)
+		if err != nil {
+			log.Println("createRawClient().Handshake_Recv():", err)
+			continue
+		}
+
+		return c
 	}
 }
 
-func util_path_rand() string {
+func utilCreateSock() net.Conn {
+	for i := 0; ; i++ {
+		url, err := url.Parse(ADDR)
+		if err != nil {
+			log.Fatal("createSock():", err)
+			continue
+		}
+
+		c, err := net.Dial("unix", url.Path)
+		if err != nil && i > 128 {
+			log.Println("createSock().Dial():", err)
+			continue
+		}
+
+		if c == nil {
+			continue
+		}
+
+		return c
+	}
+}
+
+func utilPause() {
+	<-time.After(time.Second * time.Duration(rand.Intn(SLEEP_MAX)))
+}
+
+func utilPath() string {
+	switch rand.Intn(3) {
+	case 0:
+		return utilPathRand()
+	case 1:
+		return utilPathValid()
+	default:
+		return utilPathValidWithRand()
+	}
+}
+
+func utilPathRand() string {
 	path := make([]byte, rand.Intn(128))
 	for i := range path {
 		path[i] = byte(rand.Intn(256))
@@ -43,19 +98,19 @@ func util_path_rand() string {
 	return string(path)
 }
 
-func util_path_valid() string {
+func utilPathValid() string {
 	return VALID_PATHS[rand.Intn(len(VALID_PATHS))]
 }
 
-func util_path_valid_with_rand() string {
-	path := util_path_valid()
+func utilPathValidWithRand() string {
+	path := utilPathValid()
 
 	switch rand.Intn(3) {
 	case 0:
-		return util_path_rand() + path + util_path_rand()
+		return utilPathRand() + path + utilPathRand()
 	case 1:
-		return util_path_rand() + path
+		return utilPathRand() + path
 	default:
-		return path + util_path_rand()
+		return path + utilPathRand()
 	}
 }

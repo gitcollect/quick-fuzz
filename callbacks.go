@@ -13,29 +13,29 @@ func callbacks(spawn int) {
 	}
 }
 
-func callbacks_fuzz_recv(spawn int) {
+func callbacksFuzzRecv(spawn int) {
 	for i := 0; i < spawn; i++ {
-		go callback_fuzz_recv()
+		go callbackFuzzRecv()
 	}
 }
-func callbacks_fuzz_send(spawn int) {
+func callbacksFuzzSend(spawn int) {
 	for i := 0; i < spawn; i++ {
-		go callback_fuzz_send()
+		go callbackFuzzSend()
 	}
 }
-func callbacks_fuzz_chain(spawn int) {
+func callbacksFuzzChain(spawn int) {
 	for i := 0; i < spawn; i++ {
-		go callback_fuzz_chain()
+		go callbackFuzzChain()
 	}
 }
 
 func callback() {
-	qio := createClient()
+	qio := utilCreateClient()
 	qio.Open()
 
 	chCb := make(chan bool)
 	for {
-		util_pause()
+		utilPause()
 
 		qio.Send("/qio/ping", nil,
 			func(_ interface{}, _ quickigo.ServerCbFn, code int, _ string) {
@@ -49,15 +49,15 @@ func callback() {
 	}
 }
 
-func callback_fuzz_recv() {
-	qio := createClient()
+func callbackFuzzRecv() {
+	qio := utilCreateClient()
 	qio.Open()
 
 	chCb := make(chan bool)
 	for {
-		util_pause()
+		utilPause()
 
-		qio.Send(util_path(), nil,
+		qio.Send(utilPath(), nil,
 			func(_ interface{}, _ quickigo.ServerCbFn, code int, _ string) {
 				chCb <- true
 			})
@@ -66,13 +66,13 @@ func callback_fuzz_recv() {
 	}
 }
 
-func callback_fuzz_send() {
-	qio := createClient()
+func callbackFuzzSend() {
+	qio := utilCreateClient()
 	qio.Open()
 
 	chCb := make(chan bool)
 	for {
-		util_pause()
+		utilPause()
 
 		cbId := uint32(rand.Intn(256)<<16 | rand.Intn(0xffff))
 		qio.Send(fmt.Sprintf("/qio/callback/%d", cbId), cbId,
@@ -84,13 +84,13 @@ func callback_fuzz_send() {
 	}
 }
 
-func callback_fuzz_chain() {
-	qio := createClient()
+func callbackFuzzChain() {
+	qio := utilCreateClient()
 	qio.Open()
 
 	chCb := make(chan bool)
 	for {
-		util_pause()
+		utilPause()
 
 		cbId := uint32(rand.Intn(256)<<16 | rand.Intn(0xffff))
 		qio.Send(fmt.Sprintf("/qio/callback/%d", cbId), cbId,

@@ -8,35 +8,34 @@ import (
 	"net"
 )
 
-func raws_fuzz_formatted(spawn int) {
+func rawsFuzzFormatted(spawn int) {
 	for i := 0; i < spawn; i++ {
-		go raw_fuzz_formatted()
+		go rawFuzzFormatted()
 	}
 }
 
-func raws_fuzz_framed(spawn int) {
+func rawsFuzzFramed(spawn int) {
 	for i := 0; i < spawn; i++ {
-		go raw_fuzz_framed()
+		go rawFuzzFramed()
 	}
 }
 
-func raws_fuzz_random(spawn int) {
+func rawsFuzzRandom(spawn int) {
 	for i := 0; i < spawn; i++ {
-		go raw_fuzz_random()
+		go rawFuzzRandom()
 	}
 }
 
-func raw_fuzz_formatted() {
+func rawFuzzFormatted() {
 	buff := make([]byte, 8)
 	bbuf := &bytes.Buffer{}
 
 	for {
-		util_pause()
-
-		c := createRawClient()
+		utilPause()
+		c := utilCreateRawClient()
 
 		bbuf.Reset()
-		ev := fmt.Sprintf("%s:%s=%s", util_path(), util_path(), util_path())
+		ev := fmt.Sprintf("%s:%s=%s", utilPath(), utilPath(), utilPath())
 		binary.Write(bbuf, binary.BigEndian, len(ev))
 		bbuf.WriteString(ev)
 
@@ -51,17 +50,16 @@ func raw_fuzz_formatted() {
 	}
 }
 
-func raw_fuzz_framed() {
+func rawFuzzFramed() {
 	buff := make([]byte, 8)
 	bbuf := &bytes.Buffer{}
 
 	for {
-		util_pause()
-
-		c := createRawClient()
+		utilPause()
+		c := utilCreateRawClient()
 
 		bbuf.Reset()
-		path := util_path_rand()
+		path := utilPathRand()
 		binary.Write(bbuf, binary.BigEndian, len(path))
 		bbuf.WriteString(path)
 
@@ -76,15 +74,14 @@ func raw_fuzz_framed() {
 	}
 }
 
-func raw_fuzz_random() {
+func rawFuzzRandom() {
 	buff := make([]byte, 8)
 
 	for {
-		util_pause()
+		utilPause()
+		c := utilCreateRawClient()
 
-		c := createRawClient()
-
-		c.Write([]byte(util_path_rand()))
+		c.Write([]byte(utilPathRand()))
 
 		_, err := c.Read(buff)
 		if nErr, ok := err.(net.Error); ok && nErr.Temporary() {

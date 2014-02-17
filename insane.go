@@ -15,11 +15,10 @@ func insane() {
 	buff := make([]byte, 8)
 
 	for {
-		util_pause()
+		utilPause()
+		c := utilCreateSock()
 
-		c := createSock()
-
-		c.Write([]byte(util_path()))
+		c.Write([]byte(utilPath()))
 
 		_, err := c.Read(buff)
 		if nErr, ok := err.(net.Error); ok && nErr.Temporary() {
