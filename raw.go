@@ -5,9 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
-	"math/rand"
 	"net"
-	"time"
 )
 
 func raws_fuzz_formatted(spawn int) {
@@ -33,12 +31,12 @@ func raw_fuzz_formatted() {
 	bbuf := &bytes.Buffer{}
 
 	for {
-		<-time.After(time.Second * time.Duration(rand.Intn(SLEEP_MAX)))
+		util_pause()
 
 		c := createRawClient()
 
 		bbuf.Reset()
-		ev := fmt.Sprintf("%s:%s=%s", path(), path(), path())
+		ev := fmt.Sprintf("%s:%s=%s", util_path(), util_path(), util_path())
 		binary.Write(bbuf, binary.BigEndian, len(ev))
 		bbuf.WriteString(ev)
 
@@ -58,12 +56,12 @@ func raw_fuzz_framed() {
 	bbuf := &bytes.Buffer{}
 
 	for {
-		<-time.After(time.Second * time.Duration(rand.Intn(SLEEP_MAX)))
+		util_pause()
 
 		c := createRawClient()
 
 		bbuf.Reset()
-		path := path_rand()
+		path := util_path_rand()
 		binary.Write(bbuf, binary.BigEndian, len(path))
 		bbuf.WriteString(path)
 
@@ -82,11 +80,11 @@ func raw_fuzz_random() {
 	buff := make([]byte, 8)
 
 	for {
-		<-time.After(time.Second * time.Duration(rand.Intn(SLEEP_MAX)))
+		util_pause()
 
 		c := createRawClient()
 
-		c.Write([]byte(path_rand()))
+		c.Write([]byte(util_path_rand()))
 
 		_, err := c.Read(buff)
 		if nErr, ok := err.(net.Error); ok && nErr.Temporary() {

@@ -5,7 +5,6 @@ import (
 	"github.ihrint.com/quickio/quickigo"
 	"log"
 	"math/rand"
-	"time"
 )
 
 func subscribers(spawn int) {
@@ -29,10 +28,10 @@ func subscriber(spawned int) {
 	for {
 		path := fmt.Sprintf("/fuzzer/delayed/%d", rand.Intn(spawned))
 
-		<-time.After(time.Second * time.Duration(rand.Intn(SLEEP_MAX)))
+		util_pause()
 		qio.On(path, &fn)
 
-		<-time.After(time.Second * time.Duration(rand.Intn(SLEEP_MAX)))
+		util_pause()
 		qio.Off(path, nil)
 	}
 }
@@ -43,12 +42,12 @@ func subscriber_fuzz(spawned int) {
 
 	chCb := make(chan bool)
 	for {
-		<-time.After(time.Second * time.Duration(rand.Intn(SLEEP_MAX)))
+		util_pause()
 
 		switch rand.Intn(4) {
 		case 0:
-			path := path_rand()
-			qio.Send("/qio/on", path,
+			path := util_path_rand()
+			qio.Send("/qio/ron", path,
 				func(_ interface{}, _ quickigo.ServerCbFn, code int, _ string) {
 					if code == quickigo.CODE_OK {
 						log.Println("Subscribe fuzzer: invalid event not "+
@@ -59,7 +58,7 @@ func subscriber_fuzz(spawned int) {
 				})
 
 		case 1:
-			path := path_valid_with_rand()
+			path := util_path_valid_with_rand()
 			qio.Send("/qio/on", path,
 				func(_ interface{}, _ quickigo.ServerCbFn, code int, _ string) {
 					if code == quickigo.CODE_OK {
@@ -71,7 +70,7 @@ func subscriber_fuzz(spawned int) {
 				})
 
 		case 2:
-			path := path_rand()
+			path := util_path_rand()
 			qio.Send("/qio/off", path,
 				func(_ interface{}, _ quickigo.ServerCbFn, code int, _ string) {
 					if code != quickigo.CODE_NOT_FOUND {
@@ -83,7 +82,7 @@ func subscriber_fuzz(spawned int) {
 				})
 
 		case 3:
-			path := path_valid()
+			path := util_path_valid()
 			qio.Send("/qio/off", path,
 				func(_ interface{}, _ quickigo.ServerCbFn, code int, _ string) {
 					if code != quickigo.CODE_OK {

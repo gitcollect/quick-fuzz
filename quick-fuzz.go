@@ -9,8 +9,7 @@ import (
 )
 
 const (
-	ADDR      = "unix:///tmp/quickio.sock"
-	SLEEP_MAX = 5
+	ADDR = "unix:///tmp/quickio.sock"
 )
 
 func createClient() *quickigo.QuickIGo {
@@ -52,6 +51,10 @@ func createSock() net.Conn {
 			continue
 		}
 
+		if c == nil {
+			continue
+		}
+
 		return c
 	}
 }
@@ -60,6 +63,7 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	callbacks(15000)
+	callbacks_fuzz_chain(15000)
 	callbacks_fuzz_recv(15000)
 	callbacks_fuzz_send(15000)
 	heartbeaters(20000)

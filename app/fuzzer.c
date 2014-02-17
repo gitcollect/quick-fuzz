@@ -53,6 +53,24 @@ static enum evs_status _delayed_on(const struct evs_on_info *info)
 	return EVS_STATUS_HANDLED;
 }
 
+static enum evs_status _callback_callback(
+	struct client *client G_GNUC_UNUSED,
+	const evs_cb_t client_cb G_GNUC_UNUSED,
+	gchar *json G_GNUC_UNUSED)
+{
+	return EVS_STATUS_OK;
+}
+
+static enum evs_status _callback_handler(
+	struct client *client,
+	const gchar *ev_extra G_GNUC_UNUSED,
+	const evs_cb_t client_cb,
+	gchar *json)
+{
+	evs_cb_with_cb(client, client_cb, NULL, _callback_callback, NULL, NULL);
+	return EVS_STATUS_HANDLED;
+}
+
 static void _purge_delayed()
 {
 	while (TRUE) {
@@ -96,6 +114,7 @@ static gboolean _app_init()
 {
 	evs_add_handler(PREFIX, "/delayed", NULL, _delayed_on, NULL, TRUE);
 	evs_add_handler(PREFIX, "/reject", NULL, evs_no_on, NULL, FALSE);
+	evs_add_handler(PREFIX, "/callback", _callback_handler, evs_no_on, NULL, FALSE);
 
 	_delayed = g_sequence_new(NULL);
 	_th = g_thread_new("fuzzer_main", _run, NULL);
