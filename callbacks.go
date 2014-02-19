@@ -92,8 +92,7 @@ func callbackFuzzChain() {
 	for {
 		utilPause()
 
-		cbId := uint32(rand.Intn(256)<<16 | rand.Intn(0xffff))
-		qio.Send(fmt.Sprintf("/qio/callback/%d", cbId), cbId,
+		qio.Send("/fuzzer/callback", nil,
 			func(_ interface{}, cb quickigo.ServerCbFn, code int, _ string) {
 				cb(nil, nil)
 				chCb <- true
