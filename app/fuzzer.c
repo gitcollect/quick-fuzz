@@ -55,6 +55,7 @@ static enum evs_status _delayed_on(const struct evs_on_info *info)
 
 static enum evs_status _callback_callback(
 	struct client *client G_GNUC_UNUSED,
+	const void *data G_GNUC_UNUSED,
 	const evs_cb_t client_cb G_GNUC_UNUSED,
 	gchar *json G_GNUC_UNUSED)
 {

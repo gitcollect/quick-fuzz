@@ -1,24 +1,50 @@
 package main
 
 import (
+	"flag"
+	"log"
 	"runtime"
+	"time"
 )
 
+var (
+	runTime     = -1
+	testPercent = 100
+)
+
+func init() {
+	flag.IntVar(&runTime, "runTime", -1,
+		"How long the fuzzer should run for, in seconds. -1 is infinite.")
+	flag.IntVar(&testPercent, "testPercent", 100,
+		"The percent of clients that should run for the fuzz.")
+
+	if testPercent == 0 || testPercent > 100 {
+		log.Panicf("testPercent must be between 1 and 100, %d is not valid", testPercent)
+	}
+}
+
 func main() {
+	flag.Parse()
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	callbacks(15000)
-	callbacksFuzzChain(15000)
-	callbacksFuzzRecv(15000)
-	callbacksFuzzSend(15000)
-	heartbeaters(20000)
-	insanes(50000)
-	rawsFuzzFormatted(15000)
-	rawsFuzzFramed(15000)
-	rawsFuzzRandom(15000)
-	reconnectors(2000)
-	subscribers(15000)
-	subscribersFuzz(15000)
+	percent := float32(testPercent) / 100
 
-	select {}
+	callbacks(int(15000 * percent))
+	callbacksFuzzChain(int(15000 * percent))
+	callbacksFuzzRecv(int(15000 * percent))
+	callbacksFuzzSend(int(15000 * percent))
+	heartbeaters(int(20000 * percent))
+	insanes(int(50000 * percent))
+	rawsFuzzFormatted(int(15000 * percent))
+	rawsFuzzFramed(int(15000 * percent))
+	rawsFuzzRandom(int(15000 * percent))
+	reconnectors(int(5000 * percent))
+	subscribers(int(15000 * percent))
+	subscribersFuzz(int(15000 * percent))
+
+	if runTime != -1 {
+		<-time.After(time.Second * time.Duration(runTime))
+	} else {
+		select {}
+	}
 }
