@@ -9,14 +9,19 @@ CFLAGS = \
 LDFLAGS = \
 	$(shell pkg-config --libs $(PKGS))
 
-all: fuzzer.so fuzzer.ini
+LIB_DIR = $(DESTDIR)/usr/lib/quickio
 
-fuzzer.so: fuzzer.c
+all: quick-fuzz.so
+
+quick-fuzz.so: quick-fuzz.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
-fuzzer.ini: fuzzer.ini.in
-	sed 's|{HERE}|$(CURDIR)|g' $< > $@
+install: quick-fuzz.so
+	mkdir -p $(LIB_DIR)
+	install -m 644 quick-fuzz.so $(LIB_DIR)
+
+uninstall:
+	rm -f $(LIB_DIR)/quick-fuzz.so
 
 clean:
-	rm -f fuzzer.so
-	rm -f fuzzer.ini
+	rm -f quick-fuzz.so

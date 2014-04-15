@@ -5,7 +5,7 @@
 
 #include <quickio.h>
 
-#define PREFIX "/fuzzer"
+#define PREFIX "/quick-fuzz"
 
 struct _delayed {
 	gint64 after;
@@ -35,10 +35,40 @@ static void _delay(gint64 delay, GDestroyNotify fn, void *data)
 	};
 
 	g_mutex_lock(&_lock);
+
 	g_sequence_insert_sorted(_delayed, g_slice_copy(sizeof(d), &d),
-							_delayed_cmp, NULL);
+						_delayed_cmp, NULL);
+
 	g_mutex_unlock(&_lock);
 }
+
+static void _delayed_handler_cb(void *info_)
+{
+	struct evs_on_info *info = info_;
+
+	evs_cb(info->client, info->client_cb, NULL);
+
+	qev_unref(info->client);
+	g_slice_free1(sizeof(*info), info);
+}
+
+static enum evs_status _delayed_handler(
+	struct client *client,
+	const gchar *ev_extra G_GNUC_UNUSED,
+	const evs_cb_t client_cb,
+	gchar *json)
+{
+	struct evs_on_info info = {
+		.client = qev_ref(client),
+		.client_cb = client_cb,
+	};
+
+	_delay(QEV_MS_TO_USEC(100), _delayed_handler_cb,
+			g_slice_copy(sizeof(info), &info));
+
+	return EVS_STATUS_HANDLED;
+}
+
 
 static void _delayed_on_cb(void *info_)
 {
@@ -85,7 +115,7 @@ static void _purge_delayed()
 		}
 
 		d = g_sequence_get(iter);
-		if (d->after < qev_monotonic) {
+		if (qev_monotonic < d->after) {
 			g_mutex_unlock(&_lock);
 			return;
 		}
@@ -113,12 +143,12 @@ static void* _run(void *nothing G_GNUC_UNUSED)
 
 static gboolean _app_init()
 {
-	evs_add_handler(PREFIX, "/delayed", NULL, _delayed_on, NULL, TRUE);
+	evs_add_handler(PREFIX, "/delayed", _delayed_handler, _delayed_on, NULL, TRUE);
 	evs_add_handler(PREFIX, "/reject", NULL, evs_no_on, NULL, FALSE);
 	evs_add_handler(PREFIX, "/callback", _callback_handler, evs_no_on, NULL, FALSE);
 
 	_delayed = g_sequence_new(NULL);
-	_th = g_thread_new("fuzzer_main", _run, NULL);
+	_th = g_thread_new("quick-fuzz-main", _run, NULL);
 
 	return TRUE;
 }

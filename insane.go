@@ -1,7 +1,8 @@
 package main
 
 import (
-	"log"
+	"code.google.com/p/go-uuid/uuid"
+	"math/rand"
 	"net"
 )
 
@@ -12,17 +13,32 @@ func insanes(spawn int) {
 }
 
 func insane() {
-	buff := make([]byte, 8)
+	buff := make([]byte, 1024)
 
 	for {
 		utilPause()
-		c := utilCreateSock()
 
-		c.Write([]byte(utilPath()))
+		var c net.Conn
+		uuid := uuid.New()
 
-		_, err := c.Read(buff)
-		if nErr, ok := err.(net.Error); ok && nErr.Temporary() {
-			log.Println("Temporary read error, server didn't close connection")
+		switch rand.Intn(3) {
+		case 0:
+			c = utilWebSocketClient(buff)
+
+		case 1:
+			c = utilCreateSock()
+			c.Write([]byte(httpRequest(uuid, "", true)))
+
+		default:
+			c = utilCreateRawClient()
+		}
+
+		switch rand.Intn(2) {
+		case 0:
+			c.Write([]byte(httpRequest(uuid, utilRandomEvent(), false)))
+
+		case 1:
+			c.Write([]byte(utilRandomEvent()))
 		}
 
 		c.Close()

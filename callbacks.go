@@ -1,10 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
-	"github.ihrint.com/quickio/quickigo"
 	"log"
 	"math/rand"
+	"strconv"
 )
 
 func callbacks(spawn int) {
@@ -30,74 +31,76 @@ func callbacksFuzzChain(spawn int) {
 }
 
 func callback() {
-	qio := utilCreateClient()
-	qio.Open()
+	ws := newWebSocket()
+	cbId := 1
 
-	chCb := make(chan bool)
 	for {
 		utilPause()
 
-		qio.Send("/qio/ping", nil,
-			func(_ interface{}, _ quickigo.ServerCbFn, code int, _ string) {
-				if code != quickigo.CODE_OK {
-					log.Println("Ping failed:", code)
-				}
-				chCb <- true
-			})
+		err := ws.expectPrefix(
+			fmt.Sprintf("/qio/ping:%d=null", cbId),
+			fmt.Sprintf("/qio/callback/%d", cbId))
+		if err != nil {
+			log.Println("Callback failed:", err)
+		}
 
-		<-chCb
+		cbId++
 	}
 }
 
 func callbackFuzzRecv() {
-	qio := utilCreateClient()
-	qio.Open()
+	ws := newWebSocket()
 
-	chCb := make(chan bool)
 	for {
 		utilPause()
 
-		qio.Send(utilPath(), nil,
-			func(_ interface{}, _ quickigo.ServerCbFn, code int, _ string) {
-				chCb <- true
-			})
-
-		<-chCb
+		err := ws.expectPrefix(
+			fmt.Sprintf("%s:1=null", utilPath()),
+			"/qio/callback/1")
+		if err != nil {
+			log.Println("Callback failed:", err)
+		}
 	}
 }
 
 func callbackFuzzSend() {
-	qio := utilCreateClient()
-	qio.Open()
+	ws := newWebSocket()
 
-	chCb := make(chan bool)
 	for {
 		utilPause()
 
-		cbId := uint32(rand.Intn(256)<<16 | rand.Intn(0xffff))
-		qio.Send(fmt.Sprintf("/qio/callback/%d", cbId), cbId,
-			func(_ interface{}, _ quickigo.ServerCbFn, code int, _ string) {
-				chCb <- true
-			})
+		cbId := rand.Int63() ^ (rand.Int63() << 1)
 
-		<-chCb
+		err := ws.expectPrefix(
+			fmt.Sprintf("/qio/callback/%d:1=null", cbId),
+			"/qio/callback/1")
+		if err != nil {
+			log.Println("Callback failed:", err)
+		}
 	}
 }
 
 func callbackFuzzChain() {
-	qio := utilCreateClient()
-	qio.Open()
+	ws := newWebSocket()
 
-	chCb := make(chan bool)
 	for {
 		utilPause()
 
-		qio.Send("/fuzzer/callback", nil,
-			func(_ interface{}, cb quickigo.ServerCbFn, code int, _ string) {
-				cb(nil, nil)
-				chCb <- true
-			})
+		err := ws.expectPrefix(
+			"/quick-fuzz/callback:1=null",
+			"/qio/callback/1")
+		if err != nil {
+			log.Println("Callback failed:", err)
+		} else {
+			start := bytes.Index(ws.buff, []byte(":"))
+			end := bytes.Index(ws.buff, []byte("="))
+			if start != -1 && end != -1 {
+				cbId, _ := strconv.ParseUint(string(ws.buff[start+1:end]), 10, 64)
 
-		<-chCb
+				if rand.Intn(3) > 0 {
+					ws.send(fmt.Sprintf("/qio/callback/%d:0=null", cbId))
+				}
+			}
+		}
 	}
 }

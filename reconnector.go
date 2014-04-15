@@ -7,10 +7,11 @@ func reconnectors(spawn int) {
 }
 
 func reconnector() {
+	ws := newWebSocket()
+
 	for {
-		qio := utilCreateClient()
-		qio.Open()
+		ws.open()
 		utilPause()
-		qio.Close()
+		ws.close()
 	}
 }
