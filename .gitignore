@@ -1,3 +1,2 @@
-app/fuzzer.ini
-app/fuzzer.so
+app/quick-fuzz.so
 quick-fuzz
