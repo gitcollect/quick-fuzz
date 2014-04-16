@@ -138,7 +138,13 @@ func utilPause() {
 }
 
 func randRune() rune {
-	return rune(rand.Intn(unicode.MaxRune))
+	for {
+		i := rand.Intn(unicode.MaxRune)
+		r := rune(i)
+		if i > 0 && r != ':' && r != '=' {
+			return r
+		}
+	}
 }
 
 func utilPath() string {
