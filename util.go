@@ -18,6 +18,7 @@ const (
 	Addr         = "unix:///tmp/quickio.sock"
 	QioHandshake = "/qio/ohai"
 	SleepMax     = 5
+	UuidChars = "ABCDEFabcdef123456790"
 )
 
 var (
@@ -30,6 +31,14 @@ var (
 		"/quick-fuzz/reject",
 	}
 )
+
+func utilUuid() string {
+	uuid := make([]byte, 32)
+	for i := range uuid {
+		uuid[i] = UuidChars[rand.Intn(len(UuidChars))]
+	}
+	return string(uuid)
+}
 
 func utilCreateClient() *quickigo.QuickIGo {
 	return quickigo.New([]string{Addr})

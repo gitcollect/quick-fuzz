@@ -1,7 +1,6 @@
 package main
 
 import (
-	"code.google.com/p/go-uuid/uuid"
 	"fmt"
 	"log"
 	"math/rand"
@@ -11,7 +10,7 @@ import (
 )
 
 const (
-	UuidChars = "abcdef123456790-"
+	UuidFuzzChars = "ABCDEFabcdef123456790ijklmnaoeqwe*&^(#"
 )
 
 var (
@@ -66,7 +65,7 @@ func httpRequest(uuid string, body string, connect bool) []byte {
 
 func httpReconnector() {
 	for {
-		uuid := uuid.New()
+		uuid := utilUuid()
 		c := utilCreateSock()
 		c.Write([]byte(httpRequest(uuid, "", true)))
 		utilPause()
@@ -79,7 +78,7 @@ func httpHeartbeater() {
 
 	for {
 		be_active := true
-		uuid := uuid.New()
+		uuid := utilUuid()
 
 		c := utilCreateSock()
 		c.Write(httpRequest(uuid, "", true))
@@ -90,7 +89,7 @@ func httpHeartbeater() {
 				l, _ := c.Read(buff)
 				got := buff[:l]
 				if !strings.Contains(string(got), "/qio/heartbeat:0=null") {
-					log.Println("Error with resonse: %s", string(got))
+					log.Println("Error with resonse:", string(got))
 					break
 				}
 			} else {
@@ -164,13 +163,13 @@ func httpFuzzConnect() string {
 
 func httpFuzzUuid() string {
 	if rand.Intn(2) == 0 {
-		uuid := make([]byte, rand.Intn(37))
+		uuid := make([]byte, rand.Intn(33))
 		for i := range uuid {
-			uuid[i] = UuidChars[rand.Intn(len(UuidChars))]
+			uuid[i] = UuidFuzzChars[rand.Intn(len(UuidFuzzChars))]
 		}
 		return string(uuid)
 	} else {
-		return uuid.New()
+		return utilUuid()
 	}
 }
 
@@ -229,7 +228,7 @@ func httpMultiRace() {
 	for {
 		got := 0
 		cbId := 1
-		uuid := uuid.New()
+		uuid := utilUuid()
 		socks := make([]net.Conn, rand.Intn(8)+1)
 		pingsToSend := len(socks) * (rand.Intn(5) + 1)
 		recv := make(chan string, pingsToSend)
