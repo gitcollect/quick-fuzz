@@ -25,6 +25,7 @@ func subscriber(spawned int) {
 		path := fmt.Sprintf("/quick-fuzz/delayed/%d", rand.Intn(spawned))
 
 		utilPause()
+
 		err := ws.expect(
 			fmt.Sprintf("/qio/on:1=\"%s\"", path),
 			"/qio/callback/1:0={\"code\":200,\"data\":null}")

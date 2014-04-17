@@ -84,6 +84,8 @@ func httpHeartbeater() {
 		c.Write(httpRequest(uuid, "", true))
 
 		for be_active {
+			utilPause()
+
 			if rand.Intn(2) == 1 {
 				// Wait for the HTTP poll to finish
 				l, _ := c.Read(buff)
@@ -149,7 +151,6 @@ func httpHeartbeater() {
 		}
 
 		c.Close()
-		utilPause()
 	}
 }
 
@@ -177,6 +178,8 @@ func httpFuzz() {
 	buff := make([]byte, 1024)
 
 	for {
+		utilPause()
+
 		bodyCnt := rand.Intn(10)
 		httpMeth := FuzzMethods[rand.Intn(len(FuzzMethods))]
 		connect := httpFuzzConnect()
@@ -207,7 +210,6 @@ func httpFuzz() {
 		c.Write([]byte(msg))
 		c.Read(buff)
 		c.Close()
-		utilPause()
 	}
 }
 
@@ -226,6 +228,8 @@ func httpMultiRaceRead(s net.Conn, recv chan string) {
 
 func httpMultiRace() {
 	for {
+		utilPause()
+
 		got := 0
 		cbId := 1
 		uuid := utilUuid()
@@ -266,7 +270,5 @@ func httpMultiRace() {
 		for _, s := range socks {
 			s.Close()
 		}
-
-		utilPause()
 	}
 }

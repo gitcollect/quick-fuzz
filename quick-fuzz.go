@@ -80,7 +80,7 @@ var (
 		},
 		fuzz{
 			fn:  httpMultiRaces,
-			num: 10000,
+			num: 3000,
 		},
 	}
 )
