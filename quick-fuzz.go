@@ -16,43 +16,35 @@ type fuzz struct {
 
 var (
 	runTime      = -1
-	totalClients = 100
+	totalClients = 0
 	fuzzes       = [...]fuzz{
 		fuzz{
 			fn:  callbacks,
 			num: 10000,
 		},
 		fuzz{
-			fn:  callbacksFuzzChain,
-			num: 10000,
-		},
-		fuzz{
-			fn:  callbacksFuzzRecv,
+			fn:  wsHeartbeaters,
 			num: 7500,
 		},
 		fuzz{
-			fn:  callbacksFuzzSend,
-			num: 10000,
-		},
-		fuzz{
-			fn:  heartbeaters,
+			fn:  httpHeartbeaters,
 			num: 7500,
 		},
 		fuzz{
 			fn:  insanes,
-			num: 6000,
+			num: 8000,
 		},
 		fuzz{
 			fn:  rawsFuzzFormatted,
-			num: 10000,
+			num: 11000,
 		},
 		fuzz{
 			fn:  rawsFuzzFramed,
-			num: 10000,
+			num: 11000,
 		},
 		fuzz{
 			fn:  rawsFuzzRandom,
-			num: 10000,
+			num: 11000,
 		},
 		fuzz{
 			fn:  reconnectors,
@@ -60,36 +52,28 @@ var (
 		},
 		fuzz{
 			fn:  subscribers,
-			num: 10000,
-		},
-		fuzz{
-			fn:  subscribersFuzz,
-			num: 10000,
+			num: 11000,
 		},
 		fuzz{
 			fn:  httpReconnectors,
-			num: 10000,
-		},
-		fuzz{
-			fn:  httpHeartbeaters,
-			num: 7500,
+			num: 11000,
 		},
 		fuzz{
 			fn:  httpFuzzes,
-			num: 10000,
+			num: 11000,
 		},
 		fuzz{
 			fn:  httpMultiRaces,
-			num: 3000,
+			num: 4000,
 		},
 	}
 )
 
 func init() {
 	flag.IntVar(&runTime, "runTime", -1,
-		"How long the fuzzer should run for, in seconds. -1 is infinite.")
+		"How long the fuzzer should run, in seconds. -1 is infinite.")
 	flag.IntVar(&totalClients, "totalClients", 0,
-		"The number of clients that should be used to point everything. 0 is default.")
+		"Total number of clients that should be spawned. 0 is default.")
 }
 
 func main() {

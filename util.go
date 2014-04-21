@@ -18,7 +18,7 @@ const (
 	Addr         = "unix:///tmp/quickio.sock"
 	QioHandshake = "/qio/ohai"
 	SleepMax     = 5
-	UuidChars = "ABCDEFabcdef123456790"
+	UuidChars    = "ABCDEFabcdef123456790"
 )
 
 var (

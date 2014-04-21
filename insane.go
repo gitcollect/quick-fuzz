@@ -21,7 +21,7 @@ func insane() {
 		var c net.Conn
 		uuid := uuid.New()
 
-		switch rand.Intn(4) {
+		switch rand.Intn(5) {
 		case 0:
 			c = utilWebSocketClient(buff)
 
@@ -35,6 +35,9 @@ func insane() {
 		case 3:
 			c = utilCreateSock()
 			c.Write([]byte("<policy-file-request/>"))
+
+		case 4:
+			c = utilCreateSock()
 		}
 
 		switch rand.Intn(2) {
