@@ -43,7 +43,7 @@ func httpHeartbeater() {
 				// Wait for the HTTP poll to finish
 				l, _ := c.Read(buff)
 				got := buff[:l]
-				if !strings.Contains(string(got), "/qio/heartbeat:0=null") {
+				if !strings.Contains(string(got), "Content-Length: 0") {
 					log.Println("Error with resonse:", string(got))
 					break
 				}
@@ -54,7 +54,7 @@ func httpHeartbeater() {
 				// Response to first poll
 				l, _ := c.Read(buff)
 				got := buff[:l]
-				if !strings.Contains(string(got), "/qio/heartbeat:0=null") {
+				if !strings.Contains(string(got), "Content-Length: 0") {
 					log.Println("Error with resonse:", string(got))
 					break
 				}
