@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"github.ihrint.com/quickio/quickigo"
 	"log"
 	"math/rand"
 	"net"
@@ -11,6 +10,8 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/iheartradio/quickigo"
 )
 
 const (
