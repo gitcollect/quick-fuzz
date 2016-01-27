@@ -6,6 +6,8 @@ import (
 	"net"
 	"strings"
 	"time"
+
+	"github.com/satori/go.uuid"
 )
 
 func wsHeartbeaters(spawn int) {
@@ -31,7 +33,7 @@ func httpHeartbeater() {
 
 	for {
 		be_active := true
-		uuid := utilUuid()
+		uuid := uuid.NewV4().String()
 
 		c := utilCreateSock()
 		c.Write(httpRequest(uuid, "", true))

@@ -33,16 +33,8 @@ var (
 	}
 )
 
-func utilUuid() string {
-	uuid := make([]byte, 32)
-	for i := range uuid {
-		uuid[i] = UuidChars[rand.Intn(len(UuidChars))]
-	}
-	return string(uuid)
-}
-
 func utilCreateClient() *quickigo.QuickIGo {
-	return quickigo.New([]string{Addr})
+	return quickigo.New(Addr)
 }
 
 func utilCreateRawClient() net.Conn {

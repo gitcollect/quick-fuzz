@@ -1,9 +1,10 @@
 package main
 
 import (
-	"code.google.com/p/go-uuid/uuid"
 	"math/rand"
 	"net"
+
+	"github.com/satori/go.uuid"
 )
 
 func insanes(spawn int) {
@@ -19,7 +20,7 @@ func insane() {
 		utilPause()
 
 		var c net.Conn
-		uuid := uuid.New()
+		uuid := uuid.NewV4().String()
 
 		switch rand.Intn(5) {
 		case 0:

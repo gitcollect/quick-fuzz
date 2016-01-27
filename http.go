@@ -7,6 +7,8 @@ import (
 	"net"
 	"strings"
 	"time"
+
+	"github.com/satori/go.uuid"
 )
 
 const (
@@ -59,7 +61,7 @@ func httpRequest(uuid string, body string, connect bool) []byte {
 
 func httpReconnector() {
 	for {
-		uuid := utilUuid()
+		uuid := uuid.NewV4().String()
 		c := utilCreateSock()
 		c.Write([]byte(httpRequest(uuid, "", true)))
 		utilPause()
@@ -83,7 +85,7 @@ func httpFuzzUuid() string {
 		}
 		return string(uuid)
 	} else {
-		return utilUuid()
+		return uuid.NewV4().String()
 	}
 }
 
@@ -145,7 +147,7 @@ func httpMultiRace() {
 
 		got := 0
 		cbId := 1
-		uuid := utilUuid()
+		uuid := uuid.NewV4().String()
 		socks := make([]net.Conn, rand.Intn(8)+1)
 		pingsToSend := len(socks) * (rand.Intn(5) + 1)
 		recv := make(chan string, pingsToSend)
